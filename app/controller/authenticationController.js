@@ -5,6 +5,8 @@ const models = init_models(sequelize, Sequelize);
 const bcrypt = require("bcrypt");
 const common = require("../common/common");
 const RESPONSE_MSG = require("../common/status-variable");
+const { OAuth2Client } = require("google-auth-library");
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const userLogin = async (req, res, next) => {
   const { email_id, password, browser, ip_address, os } = req.body;
@@ -100,6 +102,67 @@ const userLogin = async (req, res, next) => {
   }
 };
 
+const userGoogleLogin = async (req, res, next) => {
+  const { token, browser, ip_address, os } = req.body;
+
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const { email } = ticket.getPayload();
+
+  let existingUser;
+  try {
+    existingUser = await dbFunction.findOne(models.tbl_user, {
+      where: { email_id: email },
+    });
+
+    if (!existingUser) {
+      await common.createLog({
+        browser,
+        ip_address,
+        os,
+        log_status: "Invalid user id.",
+      });
+      return res
+        .status(RESPONSE_MSG.NOT_FOUND.CODE)
+        .json(RESPONSE_MSG.NOT_FOUND);
+    }
+
+    const createLogId = await common.createLog({
+      user_id: existingUser.user_id,
+      browser,
+      ip_address,
+      os,
+      log_status: "OK",
+    });
+
+    const jwtString = common.jwtEncode({
+      user_id: existingUser.user_id,
+      email_id: email,
+      designation_id: existingUser.designation_id,
+      log_id: createLogId.dataValues.log_id,
+    });
+
+    return res.status(RESPONSE_MSG.OK.CODE).json({
+      success: true,
+      token: jwtString,
+      message: "Ok.",
+    });
+  } catch (error) {
+    await common.createLog({
+      browser,
+      ip_address,
+      os,
+      log_status: error.message,
+    });
+    return res
+      .status(RESPONSE_MSG.INTERNAL_SERVER_ERROR.CODE)
+      .json(RESPONSE_MSG.INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   userLogin: userLogin,
+  userGoogleLogin: userGoogleLogin,
 };

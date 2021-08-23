@@ -1,12 +1,13 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
-const morgan = require("morgan");
+// const morgan = require("morgan");
 const compression = require("compression");
 const helmet = require("helmet");
 const cors = require("cors");
 const passport = require("passport");
 const app = express();
+const session = require("express-session");
 
 // Setup express server port from ENV, default: 3000
 app.set("port", process.env.PORT || 5000);
@@ -51,10 +52,43 @@ app.use(function (req, res, next) {
   next();
 });
 
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: true,
+    secret: "SECRET",
+  })
+);
+
 app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function (user, cb) {
+  cb(null, user);
+});
+
+passport.deserializeUser(function (obj, cb) {
+  cb(null, obj);
+});
+const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/callback",
+    },
+    function (accessToken, refreshToken, profile, done) {
+      userProfile = profile;
+      return done(null, userProfile);
+    }
+  )
+);
+
 app.use(compression());
 app.use(helmet());
-app.use(`/`, express.static("app/controller/Image/product"));
+
+app.use(`/product`, express.static("app/controller/Image/product"));
 app.use(`/vehicle`, express.static("app/controller/Image/vehicle"));
 app.use(`/college`, express.static("app/controller/Image/college"));
 
