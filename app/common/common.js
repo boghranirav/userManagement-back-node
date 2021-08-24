@@ -27,7 +27,7 @@ const constant = {
 
 const jwtEncode = (payload) => {
   try {
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "8h" });
   } catch (err) {
     // const error = new HttpError(err.message, 500);
     return err;
