@@ -9,7 +9,10 @@ const formidable = require("formidable");
 const RESPONSE_STATUS = require("../common/status-variable");
 const CsvParser = require("json2csv").Parser;
 const csv = require("fast-csv");
+const cache = require("../common/cache");
+
 const pathJoin = require("path");
+// const { stringify } = require("querystring");
 
 const getCollege = async (req, res, next) => {
   try {
@@ -112,7 +115,7 @@ const createCollege = async (req, res, next) => {
         return res.status(RESPONSE_STATUS.COLLEGE.ERROR.CODE).json({
           CODE: RESPONSE_STATUS.COLLEGE.ERROR.CODE,
           STATUS: RESPONSE_STATUS.COLLEGE.ERROR.STATUS,
-          DATA: response,
+          DATA: {},
           MESSAGE: RESPONSE_STATUS.COLLEGE.ERROR.MESSAGE,
         });
       }
@@ -138,7 +141,7 @@ const deleteCollege = async (req, res, next) => {
       const removeResponse = await dbFunction.remove(models.tbl_college, {
         where: { college_id: id },
       });
-
+      cache.deleteCached(id, "college");
       if (removeResponse) {
         const imgPath =
           __dirname + "/Image/college/" + getCollege.dataValues.brochure;
@@ -183,9 +186,18 @@ const deleteCollege = async (req, res, next) => {
 
 const getCollegeById = async (req, res, next) => {
   try {
-    const response = await dbFunction.findOne(models.tbl_college, {
-      where: { college_id: req.params.cId },
-    });
+    const response = await cache.cacheFind(
+      req.params.cId,
+      "college",
+      models.tbl_college,
+      {
+        where: { college_id: req.params.cId },
+      }
+    );
+
+    // const response = await dbFunction.findOne(models.tbl_college, {
+    //   where: { college_id: req.params.cId },
+    // });
     common.createHistoryLogs(req, {
       sCode: RESPONSE_STATUS.OK.CODE,
       logMsg: RESPONSE_STATUS.OK.MESSAGE,
@@ -236,6 +248,8 @@ const updateCollege = async (req, res, next) => {
           },
           collegeObject
         );
+
+        cache.deleteCached(id, "college");
 
         if (updateCollege && brochure) {
           const imgOldPath =

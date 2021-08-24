@@ -8,6 +8,8 @@ const cors = require("cors");
 const passport = require("passport");
 const app = express();
 const session = require("express-session");
+const responseTime = require("response-time");
+app.use(responseTime());
 
 // Setup express server port from ENV, default: 3000
 app.set("port", process.env.PORT || 5000);
@@ -62,28 +64,6 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
-passport.serializeUser(function (user, cb) {
-  cb(null, user);
-});
-
-passport.deserializeUser(function (obj, cb) {
-  cb(null, obj);
-});
-const GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:3000/auth/google/callback",
-    },
-    function (accessToken, refreshToken, profile, done) {
-      userProfile = profile;
-      return done(null, userProfile);
-    }
-  )
-);
 
 app.use(compression());
 app.use(helmet());
