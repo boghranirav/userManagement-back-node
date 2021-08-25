@@ -38,6 +38,10 @@ class CustomPage {
   async getContentsOf(selector) {
     return this.page.$eval(selector, (el) => el.innerHTML);
   }
+
+  async getValuesOf(selector) {
+    return this.page.$eval(selector, (el) => el.value);
+  }
 }
 
 module.exports = CustomPage;
