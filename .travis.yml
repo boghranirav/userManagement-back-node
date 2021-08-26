@@ -1,0 +1,29 @@
+language: node_js
+node:
+  - "12"
+dist: trusty
+services:
+  - postgresql
+  - redis-server
+env:
+  - PORT=5000
+  - env="development"
+  - HOST= "localhost"
+  - DBPORT= "5432"
+  - USER= "postgres"
+  - PASSWORD= "root"
+  - DB= "userManagement"
+  - JWT_KEY="supersecret_dont_share"
+  - JWT_SECRET="userManagement123"
+  - GOOGLE_CLIENT_ID="715180532991-um5kroc5a8jb3tskb0lem34m9stebumk.apps.googleusercontent.com"
+  - GOOGLE_CLIENT_SECRET="4nz65vHLMvz2MxC1vsWabuTv"
+cache:
+  directories:
+    - node_modules
+install:
+  - npm install
+  - npm run build
+script:
+  - nohup npm run start &
+  - sleep 3
+  - npm run test
