@@ -15,6 +15,8 @@ env:
   - DB= "userManagement"
   - JWT_KEY="supersecret_dont_share"
   - JWT_SECRET="userManagement123"
+  - GOOGLE_CLIENT_ID="715180532991-um5kroc5a8jb3tskb0lem34m9stebumk.apps.googleusercontent.com"
+  - GOOGLE_CLIENT_SECRET="4nz65vHLMvz2MxC1vsWabuTv"
 cache:
   directories:
     - node_modules
