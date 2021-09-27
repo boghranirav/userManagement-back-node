@@ -9,6 +9,11 @@ const passport = require("passport");
 const app = express();
 const session = require("express-session");
 const responseTime = require("response-time");
+const { graphqlHTTP } = require("express-graphql");
+const graphqlSchema = require("./app/graphql/schema");
+const graphqlResolver = require("./app/graphql/resolvers");
+// var cookieParser = require("cookie-parser");
+// var csrf = require("csurf");
 app.use(responseTime());
 
 // Setup express server port from ENV, default: 3000
@@ -31,6 +36,11 @@ app.use(
  * use cors
  */
 app.use(cors());
+
+// var csrfProtection = csrf({ cookie: true });
+// var parseForm = bodyParser.urlencoded({ extended: false });
+// app.use(cookieParser());
+
 /**
  * allow cors origin
  */
@@ -53,6 +63,24 @@ app.use(function (req, res, next) {
   // Pass to next layer of middleware
   next();
 });
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema: graphqlSchema,
+    rootValue: graphqlResolver,
+    graphiql: true,
+    formatError(err) {
+      if (!err.originalError) {
+        return err;
+      }
+      const data = err.originalError.data;
+      const message = err.message || "An error occurred.";
+      const code = err.originalError || 500;
+      return { message, status: code, data };
+    },
+  })
+);
 
 app.use(
   session({

@@ -18,15 +18,19 @@
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
+    "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+    "csurf": "^1.11.0",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
+    "express-graphql": "^0.12.0",
     "express-session": "^1.17.2",
     "express-validator": "^6.12.1",
     "fast-csv": "^4.3.6",
     "formidable": "^1.2.2",
     "fs": "0.0.1-security",
     "google-auth-library": "^7.6.2",
+    "graphql": "^15.6.0",
     "helmet": "^4.6.0",
     "jest": "^27.0.6",
     "json2csv": "^5.0.6",
@@ -45,6 +49,7 @@
     "response-time": "^2.3.2",
     "sequelize": "^6.6.5",
     "sequelize-auto": "^0.8.3",
-    "sequelize-redis": "^1.0.12"
+    "sequelize-redis": "^1.0.12",
+    "validator": "^13.6.0"
   }
 }
